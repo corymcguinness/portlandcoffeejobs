@@ -7,10 +7,16 @@ const METROS: Record<string, { city: string; state: string; title: string }> = {
   "portland-or": { city: "Portland", state: "OR", title: "Post a Portland Coffee Job" }
 };
 
-export default function PostJob({ params }: { params: { metro: string } }) {
-  const metro = params.metro;
-
+export default async function PostJob({
+  params
+}: {
+  params: Promise<{ metro: string }>;
+}) {
+  const { metro } = await params;
   const metroInfo = METROS[metro];
+
+  // ...keep the rest of your component the same
+  // (no other changes required)
 
   const [form, setForm] = useState({
     cafe_name: "",
