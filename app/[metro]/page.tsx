@@ -7,8 +7,12 @@ const METROS: Record<string, { city: string; state: string; title: string }> = {
   "portland-or": { city: "Portland", state: "OR", title: "Portland Coffee Jobs" }
 };
 
-export default async function MetroPage({ params }: { params: { metro: string } }) {
-  const metro = params.metro;
+export default async function MetroPage({
+  params
+}: {
+  params: Promise<{ metro: string }>;
+}) {
+  const { metro } = await params;
 
   if (!METROS[metro]) {
     return (
@@ -36,17 +40,7 @@ export default async function MetroPage({ params }: { params: { metro: string } 
         <a href={`/${metro}/post`} style={{ fontWeight: 600 }}>Post a job</a>
       </header>
 
-      <section style={{ marginTop: 20, padding: 12, border: "1px solid #eee", borderRadius: 12 }}>
-        <div style={{ fontSize: 14 }}>
-          <strong>Pricing:</strong> Standard $5–10 · Pinned $20 (requested, subject to approval)
-        </div>
-      </section>
-
-      {error && (
-        <p style={{ marginTop: 20 }}>
-          Error loading jobs: {error.message}
-        </p>
-      )}
+      {error && <p style={{ marginTop: 20 }}>Error loading jobs: {error.message}</p>}
 
       <div style={{ marginTop: 20, display: "grid", gap: 12 }}>
         {(jobs ?? []).length === 0 ? (
@@ -70,17 +64,6 @@ export default async function MetroPage({ params }: { params: { metro: string } 
                   Posted {new Date(j.created_at).toLocaleDateString("en-US")}
                 </div>
               </div>
-
-              {(j.apply_url || j.apply_email) && (
-                <div style={{ marginTop: 10, display: "flex", gap: 12, flexWrap: "wrap" }}>
-                  {j.apply_url && <a href={j.apply_url} target="_blank" rel="noreferrer">Apply link</a>}
-                  {j.apply_email && <a href={`mailto:${j.apply_email}`}>Email</a>}
-                </div>
-              )}
-
-              {j.description && (
-                <p style={{ marginTop: 10, opacity: 0.9, whiteSpace: "pre-wrap" }}>{j.description}</p>
-              )}
             </article>
           ))
         )}
