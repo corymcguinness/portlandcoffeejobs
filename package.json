@@ -1,5 +1,5 @@
 {
-  "name": "coffee-jobs",
+  "name": "portlandcoffeejobs",
   "private": true,
   "scripts": {
     "build": "next build",
