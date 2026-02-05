@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const METROS: Record<string, { city: string; state: string; title: string }> = {
-  "portland-or": { city: "Portland", state: "OR", title: "Post a Portland Coffee Job" }
+  "portland-or": { city: "Portland", state: "OR", title: "Post A Portland Coffee Job" }
 };
 
 export default function PostJobClient({ metro }: { metro: string }) {
@@ -79,7 +79,7 @@ export default function PostJobClient({ metro }: { metro: string }) {
     }
 
     setStatus("success");
-    setMsg("Submitted! We’ll review it shortly and post it if it fits (Portland coffee jobs only, pay required).");
+    setMsg("Submitted! We’ll review it shortly and post if it fits.");
     setForm({
       cafe_name: "",
       role: "Barista",
@@ -100,7 +100,7 @@ export default function PostJobClient({ metro }: { metro: string }) {
         <div>
           <h1 style={{ margin: 0 }}>{metroInfo.title}</h1>
           <p style={{ marginTop: 6, opacity: 0.8 }}>
-            Standard $5–10 · Pinned request $20. We’ll reply with payment instructions after review.
+            Standard $10 · Pinned request $20. We’ll reply with payment instructions after review.
           </p>
         </div>
         <a href={`/${metro}`} style={{ fontWeight: 600 }}>← Back</a>
@@ -116,8 +116,9 @@ export default function PostJobClient({ metro }: { metro: string }) {
             <option>Barista</option>
             <option>Lead Barista</option>
             <option>Shift Lead</option>
-            <option>Café Manager</option>
+            <option>Manager</option>
             <option>Roaster</option>
+            <option>Production</option>
             <option>Other</option>
           </select>
         </Field>
