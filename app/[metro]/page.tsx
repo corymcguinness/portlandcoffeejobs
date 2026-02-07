@@ -6,11 +6,17 @@ export function generateStaticParams() {
   return [{ metro: "portland-or" }];
 }
 
-export default async function MetroPage({
-  params
+export default function MetroPage({
+  params,
+  searchParams
 }: {
-  params: Promise<{ metro: string }>;
+  params: { metro: string };
+  searchParams?: { paid?: string };
 }) {
-  const { metro } = await params;
-  return <MetroClient metro={metro} />;
+  return (
+    <MetroClient
+      metro={params.metro}
+      paid={searchParams?.paid === "1"}
+    />
+  );
 }
