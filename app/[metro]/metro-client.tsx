@@ -22,7 +22,13 @@ type Job = {
   description: string | null;
 };
 
-export default function MetroClient({ metro }: { metro: string }) {
+export default function MetroClient({
+  metro,
+  paid
+}: {
+  metro: string;
+  paid?: boolean;
+}) {
   const metroInfo = METROS[metro];
 
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -76,6 +82,21 @@ export default function MetroClient({ metro }: { metro: string }) {
 
   return (
     <main>
+      {paid && (
+        <div
+          style={{
+            marginBottom: 16,
+            padding: "12px 14px",
+            borderRadius: 12,
+            background: "#e6fffa",
+            border: "1px solid #99f6e4",
+            fontWeight: 600
+          }}
+        >
+          ✅ Payment received. Your job will be reviewed and published shortly.
+        </div>
+      )}
+
       <header style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "baseline" }}>
         <div>
           <h1 style={{ margin: 0 }}>{title}</h1>
