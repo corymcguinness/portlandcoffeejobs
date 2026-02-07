@@ -8,6 +8,17 @@ const METROS: Record<string, { city: string; state: string; title: string }> = {
   "portland-or": { city: "Portland", state: "OR", title: "Post A Portland Coffee Job" }
 };
 
+function safeBaseUrl(raw: string) {
+  const cleaned = String(raw || "").trim().replace(/\/+$/, "");
+  try {
+    // throws if invalid
+    new URL(cleaned);
+    return cleaned;
+  } catch {
+    return "";
+  }
+}
+
 export default function PostJobClient({ metro }: { metro: string }) {
   const metroInfo = METROS[metro];
 
@@ -31,7 +42,7 @@ export default function PostJobClient({ metro }: { metro: string }) {
     if (!metroInfo) return false;
     if (!form.cafe_name.trim()) return false;
     if (!form.role.trim()) return false;
-    if (!form.pay.trim()) return false; // pay required
+    if (!form.pay.trim()) return false;
     if (!form.apply_url.trim() && !form.apply_email.trim()) return false;
     return true;
   }, [form, metroInfo]);
@@ -48,6 +59,14 @@ export default function PostJobClient({ metro }: { metro: string }) {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    if (status === "submitting") return;
+
+    const base = safeBaseUrl(WORKER_BASE);
+    if (!base) {
+      setStatus("error");
+      setMsg("Payments service URL is misconfigured. Please try again later.");
+      return;
+    }
 
     setStatus("submitting");
     setMsg("");
@@ -72,7 +91,7 @@ export default function PostJobClient({ metro }: { metro: string }) {
     };
 
     try {
-      const res = await fetch(`${WORKER_BASE}/create-checkout`, {
+      const res = await fetch(`${base}/create-checkout`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(payload)
@@ -83,7 +102,6 @@ export default function PostJobClient({ metro }: { metro: string }) {
       if (!res.ok) {
         throw new Error(data?.error || "Checkout failed. Please try again.");
       }
-
       if (!data?.url) {
         throw new Error("Checkout URL missing. Please try again.");
       }
@@ -93,6 +111,8 @@ export default function PostJobClient({ metro }: { metro: string }) {
     } catch (err: any) {
       setStatus("error");
       setMsg(err?.message || "Something went wrong. Please try again.");
+      // allow user to retry without refreshing
+      setTimeout(() => setStatus("idle"), 0);
     }
   }
 
@@ -176,10 +196,7 @@ export default function PostJobClient({ metro }: { metro: string }) {
         </Field>
 
         <Field label="Your email (optional, for questions)">
-          <input
-            value={form.contact_email}
-            onChange={(e) => setForm({ ...form, contact_email: e.target.value })}
-          />
+          <input value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} />
         </Field>
 
         <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
@@ -207,7 +224,7 @@ export default function PostJobClient({ metro }: { metro: string }) {
           {status === "submitting" ? "Redirecting to payment…" : "Pay & submit for review"}
         </button>
 
-        {msg && <p style={{ marginTop: 6, color: status === "error" ? "crimson" : "inherit" }}>{msg}</p>}
+        {msg && <p style={{ marginTop: 6, color: "crimson" }}>{msg}</p>}
 
         <p style={{ fontSize: 12, opacity: 0.75, marginTop: 8 }}>
           Rules: Portland coffee/café jobs only. Pay required. No recruiters. If we decline your post, we’ll refund you.
