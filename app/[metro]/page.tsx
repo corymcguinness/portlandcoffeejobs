@@ -7,16 +7,10 @@ export function generateStaticParams() {
 }
 
 export default function MetroPage({
-  params,
-  searchParams
+  params
 }: {
   params: { metro: string };
-  searchParams?: { paid?: string };
 }) {
-  return (
-    <MetroClient
-      metro={params.metro}
-      paid={searchParams?.paid === "1"}
-    />
-  );
+  const { metro } = params;
+  return <MetroClient metro={metro} />;
 }
