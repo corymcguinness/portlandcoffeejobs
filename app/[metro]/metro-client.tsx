@@ -85,9 +85,12 @@ export default function MetroClient({ metro }: { metro: string }) {
         <header style={headerRow}>
           <div>
             <h1 style={{ margin: 0, fontSize: 44, letterSpacing: -0.6 }}>{title}</h1>
-            <p style={{ marginTop: 8, opacity: 0.8, fontSize: 16 }}>
-              Barista + café jobs. Pay shown. Curated listings only.
-            </p>
+         <p style={{ marginTop: 8, opacity: 0.8, fontSize: 16 }}>
+  Barista + Coffee Industry Jobs. Curated listings only
+  <InfoTooltip
+    text="Charging to post keeps listings intentional, up-to-date, and spam-free. If we decline a post, we refund it."
+  />
+</p>
           </div>
           <a href={`/${metro}/post`} style={ctaLink}>
             Post a job →
@@ -277,3 +280,46 @@ function fmtDate(d: string) {
 function whyHref(metro: string) {
   return `/${metro}/post#why-paid`;
 }
+
+function InfoTooltip({ text }: { text: string }) {
+  return (
+    <span style={{ position: "relative", display: "inline-block" }}>
+      <span
+        style={{
+          marginLeft: 6,
+          cursor: "help",
+          fontWeight: 700,
+          opacity: 0.7
+        }}
+      >
+        ⓘ
+      </span>
+      <span className="tooltip">{text}</span>
+
+      <style jsx>{`
+        .tooltip {
+          position: absolute;
+          bottom: 140%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 260px;
+          padding: 10px 12px;
+          background: #111;
+          color: #fff;
+          font-size: 12px;
+          line-height: 1.4;
+          border-radius: 10px;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.15s ease;
+          z-index: 10;
+        }
+
+        span:hover + .tooltip {
+          opacity: 1;
+        }
+      `}</style>
+    </span>
+  );
+}
+
