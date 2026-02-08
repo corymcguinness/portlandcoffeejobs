@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-const WORKER_BASE = "https://pcj-payments.corymcguinness.workers.dev";
+const WORKER_BASE = "https://portlandcoffeejobs.com/api";
 
 const METROS: Record<string, { city: string; state: string; title: string }> = {
   "portland-or": { city: "Portland", state: "OR", title: "Post A Portland Coffee Job" }
