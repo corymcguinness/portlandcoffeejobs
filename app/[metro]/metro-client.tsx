@@ -185,7 +185,7 @@ export default function MetroClient({ metro }: { metro: string }) {
             </div>
 
             <div style={{ opacity: 0.7, fontSize: 12 }}>
-              Curated listings · No recruiters · Refunds on declined posts
+              Curated listings · No recruiters · Community run
             </div>
           </div>
         </footer>
