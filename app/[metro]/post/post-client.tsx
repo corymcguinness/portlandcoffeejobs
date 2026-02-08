@@ -11,7 +11,6 @@ const METROS: Record<string, { city: string; state: string; title: string }> = {
 function safeBaseUrl(raw: string) {
   const cleaned = String(raw || "").trim().replace(/\/+$/, "");
   try {
-    // throws if invalid
     new URL(cleaned);
     return cleaned;
   } catch {
@@ -35,7 +34,7 @@ export default function PostJobClient({ metro }: { metro: string }) {
     requested_pinned: false
   });
 
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [msg, setMsg] = useState("");
 
   const canSubmit = useMemo(() => {
@@ -106,12 +105,10 @@ export default function PostJobClient({ metro }: { metro: string }) {
         throw new Error("Checkout URL missing. Please try again.");
       }
 
-      // Redirect to Stripe Checkout
       window.location.href = data.url;
     } catch (err: any) {
       setStatus("error");
       setMsg(err?.message || "Something went wrong. Please try again.");
-      // allow user to retry without refreshing
       setTimeout(() => setStatus("idle"), 0);
     }
   }
@@ -124,7 +121,18 @@ export default function PostJobClient({ metro }: { metro: string }) {
           <p style={{ marginTop: 6, opacity: 0.8 }}>
             Standard $10 · Pinned request $20. Pay first, then we review and publish if it fits.
           </p>
+
+          <p style={{ marginTop: 8, fontSize: 13, opacity: 0.85 }}>
+            Seen by Portland coffee shops & baristas. Curated listings only.
+            <span
+              title="Payment + review keeps the board focused on real café jobs (no recruiters, no spam). If we decline, we refund."
+              style={{ marginLeft: 6, textDecoration: "underline dotted", cursor: "help" }}
+            >
+              Why?
+            </span>
+          </p>
         </div>
+
         <a href={`/${metro}`} style={{ fontWeight: 600 }}>
           ← Back
         </a>
@@ -227,7 +235,7 @@ export default function PostJobClient({ metro }: { metro: string }) {
         {msg && <p style={{ marginTop: 6, color: "crimson" }}>{msg}</p>}
 
         <p style={{ fontSize: 12, opacity: 0.75, marginTop: 8 }}>
-          Rules: Portland coffee/café jobs only. Pay required. No recruiters. If we decline your post, we’ll refund you.
+          Rules: Portland coffee/café jobs only. No recruiters. If we decline your post, we’ll refund you.
         </p>
       </form>
     </main>
