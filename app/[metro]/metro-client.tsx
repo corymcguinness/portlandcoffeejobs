@@ -24,10 +24,27 @@ type Job = {
   description: string | null;
 };
 
+function isPinnedNow(j: Job) {
+  if (!j.pinned) return false;
+  if (!j.pinned_until) return true; // legacy/always pinned
+  return new Date(j.pinned_until) > new Date();
+}
+
+function sortJobs(a: Job, b: Job) {
+  const ap = isPinnedNow(a) ? 1 : 0;
+  const bp = isPinnedNow(b) ? 1 : 0;
+  if (ap !== bp) return bp - ap; // pinned first
+
+  const at = Date.parse(a.created_at);
+  const bt = Date.parse(b.created_at);
+  if (Number.isFinite(at) && Number.isFinite(bt) && at !== bt) return bt - at; // newest first
+
+  return String(b.id).localeCompare(String(a.id)); // stable-ish tie break
+}
+
 export default function MetroClient({ metro }: { metro: string }) {
   const metroInfo = METROS[metro];
   const searchParams = useSearchParams();
-
   const paid = searchParams.get("paid") === "1";
 
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -48,8 +65,7 @@ export default function MetroClient({ metro }: { metro: string }) {
         .from("jobs")
         .select("*")
         .eq("metro_slug", metro)
-        .order("pinned", { ascending: false })
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false }); // we’ll do pinned logic locally
 
       if (cancelled) return;
 
@@ -57,14 +73,14 @@ export default function MetroClient({ metro }: { metro: string }) {
         setErrorMsg(error.message);
         setJobs([]);
       } else {
-        setJobs((data ?? []) as Job[]);
+        const rows = ((data ?? []) as Job[]).slice().sort(sortJobs);
+        setJobs(rows);
       }
 
       setLoading(false);
     }
 
     load();
-
     return () => {
       cancelled = true;
     };
@@ -77,12 +93,6 @@ export default function MetroClient({ metro }: { metro: string }) {
         <p>This metro isn’t live yet.</p>
       </main>
     );
-  }
-
-  function isPinned(j: Job) {
-    if (!j.pinned) return false;
-    if (!j.pinned_until) return true; // legacy/always pinned
-    return new Date(j.pinned_until) > new Date();
   }
 
   return (
@@ -125,7 +135,7 @@ export default function MetroClient({ metro }: { metro: string }) {
           </div>
         ) : (
           jobs.map((j) => {
-            const pinnedNow = isPinned(j);
+            const pinnedNow = isPinnedNow(j);
 
             return (
               <article key={j.id} style={{ padding: 16, border: "1px solid #eee", borderRadius: 12 }}>
@@ -133,9 +143,7 @@ export default function MetroClient({ metro }: { metro: string }) {
                   <div>
                     <div style={{ fontSize: 18, fontWeight: 700 }}>
                       {j.role} — {j.cafe_name}{" "}
-                      {pinnedNow && (
-                        <span style={{ fontSize: 12, marginLeft: 8, opacity: 0.8 }}>📌 Pinned</span>
-                      )}
+                      {pinnedNow && <span style={{ fontSize: 12, marginLeft: 8, opacity: 0.8 }}>📌 Pinned</span>}
                     </div>
                     <div style={{ marginTop: 6, opacity: 0.85 }}>
                       {j.pay}
