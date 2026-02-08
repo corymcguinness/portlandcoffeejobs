@@ -17,6 +17,7 @@ type Job = {
   hours: string | null;
   neighborhood: string | null;
   pinned: boolean;
+  pinned_until: string | null;
   created_at: string;
   apply_url: string | null;
   apply_email: string | null;
@@ -78,6 +79,12 @@ export default function MetroClient({ metro }: { metro: string }) {
     );
   }
 
+  function isPinned(j: Job) {
+    if (!j.pinned) return false;
+    if (!j.pinned_until) return true; // legacy/always pinned
+    return new Date(j.pinned_until) > new Date();
+  }
+
   return (
     <main>
       <header style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "baseline" }}>
@@ -117,41 +124,47 @@ export default function MetroClient({ metro }: { metro: string }) {
             No jobs posted yet. Be the first.
           </div>
         ) : (
-          jobs.map((j) => (
-            <article key={j.id} style={{ padding: 16, border: "1px solid #eee", borderRadius: 12 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <div>
-                  <div style={{ fontSize: 18, fontWeight: 700 }}>
-                    {j.role} — {j.cafe_name}{" "}
-                    {j.pinned && <span style={{ fontSize: 12, marginLeft: 8, opacity: 0.8 }}>📌 Pinned</span>}
-                  </div>
-                  <div style={{ marginTop: 6, opacity: 0.85 }}>
-                    {j.pay}
-                    {j.hours ? ` · ${j.hours}` : ""}
-                    {j.neighborhood ? ` · ${j.neighborhood}` : ""}
-                  </div>
-                </div>
-                <div style={{ textAlign: "right", fontSize: 12, opacity: 0.7 }}>
-                  Posted {new Date(j.created_at).toLocaleDateString("en-US")}
-                </div>
-              </div>
+          jobs.map((j) => {
+            const pinnedNow = isPinned(j);
 
-              {(j.apply_url || j.apply_email) && (
-                <div style={{ marginTop: 10, display: "flex", gap: 12, flexWrap: "wrap" }}>
-                  {j.apply_url && (
-                    <a href={j.apply_url} target="_blank" rel="noreferrer">
-                      Apply link
-                    </a>
-                  )}
-                  {j.apply_email && <a href={`mailto:${j.apply_email}`}>Email</a>}
+            return (
+              <article key={j.id} style={{ padding: 16, border: "1px solid #eee", borderRadius: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 18, fontWeight: 700 }}>
+                      {j.role} — {j.cafe_name}{" "}
+                      {pinnedNow && (
+                        <span style={{ fontSize: 12, marginLeft: 8, opacity: 0.8 }}>📌 Pinned</span>
+                      )}
+                    </div>
+                    <div style={{ marginTop: 6, opacity: 0.85 }}>
+                      {j.pay}
+                      {j.hours ? ` · ${j.hours}` : ""}
+                      {j.neighborhood ? ` · ${j.neighborhood}` : ""}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right", fontSize: 12, opacity: 0.7 }}>
+                    Posted {new Date(j.created_at).toLocaleDateString("en-US")}
+                  </div>
                 </div>
-              )}
 
-              {j.description && (
-                <p style={{ marginTop: 10, opacity: 0.9, whiteSpace: "pre-wrap" }}>{j.description}</p>
-              )}
-            </article>
-          ))
+                {(j.apply_url || j.apply_email) && (
+                  <div style={{ marginTop: 10, display: "flex", gap: 12, flexWrap: "wrap" }}>
+                    {j.apply_url && (
+                      <a href={j.apply_url} target="_blank" rel="noreferrer">
+                        Apply link
+                      </a>
+                    )}
+                    {j.apply_email && <a href={`mailto:${j.apply_email}`}>Email</a>}
+                  </div>
+                )}
+
+                {j.description && (
+                  <p style={{ marginTop: 10, opacity: 0.9, whiteSpace: "pre-wrap" }}>{j.description}</p>
+                )}
+              </article>
+            );
+          })
         )}
       </div>
     </main>
