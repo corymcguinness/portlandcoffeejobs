@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 const METROS: Record<string, { city: string; state: string; title: string }> = {
@@ -22,14 +23,11 @@ type Job = {
   description: string | null;
 };
 
-export default function MetroClient({
-  metro,
-  paid
-}: {
-  metro: string;
-  paid?: boolean;
-}) {
+export default function MetroClient({ metro }: { metro: string }) {
   const metroInfo = METROS[metro];
+  const searchParams = useSearchParams();
+
+  const paid = searchParams.get("paid") === "1";
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,21 +80,6 @@ export default function MetroClient({
 
   return (
     <main>
-      {paid && (
-        <div
-          style={{
-            marginBottom: 16,
-            padding: "12px 14px",
-            borderRadius: 12,
-            background: "#e6fffa",
-            border: "1px solid #99f6e4",
-            fontWeight: 600
-          }}
-        >
-          ✅ Payment received. Your job will be reviewed and published shortly.
-        </div>
-      )}
-
       <header style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "baseline" }}>
         <div>
           <h1 style={{ margin: 0 }}>{title}</h1>
@@ -106,6 +89,23 @@ export default function MetroClient({
           Post a job
         </a>
       </header>
+
+      {paid && (
+        <div
+          style={{
+            marginTop: 14,
+            padding: 14,
+            border: "1px solid #e6e6e6",
+            borderRadius: 12,
+            background: "#fafafa"
+          }}
+        >
+          <div style={{ fontWeight: 800 }}>✅ Payment received</div>
+          <div style={{ marginTop: 6, opacity: 0.85 }}>
+            Your job post is now <b>pending review</b>. If approved, we’ll publish it shortly.
+          </div>
+        </div>
+      )}
 
       {errorMsg && <p style={{ marginTop: 20 }}>Error loading jobs: {errorMsg}</p>}
 
